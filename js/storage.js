@@ -129,6 +129,18 @@ class StorageManager {
     });
   }
 
+  static async clearAllBooks() {
+    const db = await this.openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.clear();
+
+      request.onsuccess = () => resolve(true);
+      request.onerror = (event) => reject(event.target.error);
+    });
+  }
+
   static getLastRack() {
     return localStorage.getItem(LAST_RACK_KEY) || '';
   }

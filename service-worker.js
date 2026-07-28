@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sbc-inventory-v4';
+const CACHE_NAME = 'sbc-inventory-v5';
 const APP_ASSETS = [
   './',
   './index.html',

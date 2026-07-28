@@ -639,6 +639,24 @@ window.deleteBook = async (id) => {
   }
 };
 
+document.getElementById('btn-delete-all').addEventListener('click', async () => {
+  const allBooks = await StorageManager.getAllBooks();
+  if (!allBooks.length) {
+    alert('Inventory is already empty.');
+    return;
+  }
+
+  const confirmed = confirm(`Delete ALL ${allBooks.length} inventory items? This cannot be undone.`);
+  if (!confirmed) return;
+
+  await StorageManager.clearAllBooks();
+  filteredBooksList = [];
+  alert('All inventory items deleted.');
+  loadInventory();
+  updateStationerySupplierSummary();
+  updateRecentStationeryList();
+});
+
 // CSV Export
 document.getElementById('btn-export-all').addEventListener('click', async () => {
   const allBooks = await StorageManager.getAllBooks();
