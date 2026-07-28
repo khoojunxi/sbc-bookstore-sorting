@@ -360,6 +360,21 @@ form select:focus {
   white-space: nowrap;
 }
 
+.recent-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto auto auto;
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 9px 0;
+  font-size: 0.9rem;
+}
+
+.recent-row span {
+  color: #4b5563;
+  white-space: nowrap;
+}
+
 .empty-state {
   color: #6b7280;
   font-size: 0.9rem;
@@ -486,6 +501,10 @@ th {
   }
 
   .supplier-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .recent-row {
     grid-template-columns: 1fr 1fr;
   }
 }

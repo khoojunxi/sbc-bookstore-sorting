@@ -148,14 +148,16 @@ document.getElementById('btn-type-stationery').addEventListener('click', async (
   modalItemType.classList.add('hidden');
   await updatePublisherSuggestions();
 
-  document.getElementById('ns-barcode').value = pendingBarcode;
-  document.getElementById('ns-name').value = '';
-  document.getElementById('ns-supplier').value = '';
-  document.getElementById('ns-rack').value = StorageManager.getLastRack();
-  document.getElementById('ns-price').value = '';
-  document.getElementById('ns-qty').value = 1;
+  document.getElementById('st-code').value = pendingBarcode;
+  document.getElementById('st-supplier').value = StorageManager.getLastSupplier();
+  document.getElementById('st-name').value = '';
+  document.getElementById('st-rack').value = StorageManager.getLastRack();
+  document.getElementById('st-qty').value = 1;
+  document.getElementById('st-price').value = '';
+  document.getElementById('st-status').textContent = '';
 
-  showSection('new-stationery');
+  showSection('stationery-stocktake');
+  await prepareStationeryStocktake();
 });
 
 function cleanLookupCode(value) {
@@ -216,7 +218,12 @@ document.getElementById('btn-confirm-add').addEventListener('click', async () =>
   await StorageManager.saveBook(activeBook);
   modalExisting.classList.add('hidden');
   alert(`Quantity updated! Total: ${activeBook.quantity}`);
-  showSection('scan');
+  if (isStationeryItem(activeBook)) {
+    showSection('stationery-stocktake');
+    await prepareStationeryStocktake();
+  } else {
+    showSection('scan');
+  }
 });
 
 document.getElementById('btn-cancel-add').addEventListener('click', () => {
@@ -263,7 +270,8 @@ document.getElementById('form-new-stationery').addEventListener('submit', async 
     rackLocation: rack,
     bookCategory: 'Stationery',
     sellingPrice: parseFloat(document.getElementById('ns-price').value),
-    quantity: parseInt(document.getElementById('ns-qty').value, 10)
+    quantity: parseInt(document.getElementById('ns-qty').value, 10),
+    updatedAt: Date.now()
   };
 
   await StorageManager.saveBook(stationery);
@@ -271,11 +279,13 @@ document.getElementById('form-new-stationery').addEventListener('submit', async 
   StorageManager.setLastSupplier(stationery.publisher);
 
   alert('Stationery item saved successfully!');
-  showSection('scan');
+  showSection('stationery-stocktake');
+  await prepareStationeryStocktake();
 });
 
 document.getElementById('btn-cancel-new-stat').addEventListener('click', () => {
-  showSection('scan');
+  showSection('stationery-stocktake');
+  prepareStationeryStocktake();
 });
 
 // Dedicated stationery stocktake workflow
@@ -290,6 +300,7 @@ async function prepareStationeryStocktake() {
   }
 
   await updateStationerySupplierSummary();
+  await updateRecentStationeryList();
   document.getElementById('st-code').focus();
 }
 
@@ -373,6 +384,29 @@ async function updateStationerySupplierSummary() {
   `).join('');
 }
 
+async function updateRecentStationeryList() {
+  const allBooks = await StorageManager.getAllBooks();
+  const recentItems = allBooks
+    .filter(isStationeryItem)
+    .sort((a, b) => (Number(b.updatedAt) || Number(b.id) || 0) - (Number(a.updatedAt) || Number(a.id) || 0))
+    .slice(0, 6);
+
+  const container = document.getElementById('stationery-recent-list');
+  if (!recentItems.length) {
+    container.innerHTML = '<p class="empty-state">No stationery saved yet.</p>';
+    return;
+  }
+
+  container.innerHTML = recentItems.map(item => `
+    <div class="recent-row">
+      <strong>${escapeHTML(item.isbn)} - ${escapeHTML(item.title)}</strong>
+      <span>${escapeHTML(item.publisher || '-')}</span>
+      <span>Rack ${escapeHTML(item.rackLocation || '-')}</span>
+      <span>Qty ${escapeHTML(item.quantity)}</span>
+    </div>
+  `).join('');
+}
+
 ['st-code', 'st-supplier'].forEach(id => {
   document.getElementById(id).addEventListener('change', prefillStocktakeFromExisting);
 });
@@ -421,6 +455,7 @@ document.getElementById('form-stationery-stocktake').addEventListener('submit', 
   stationery.rackLocation = rack;
   stationery.sellingPrice = price;
   stationery.quantity = qty;
+  stationery.updatedAt = Date.now();
 
   await StorageManager.saveBook(stationery);
   StorageManager.setLastRack(rack);
@@ -430,6 +465,7 @@ document.getElementById('form-stationery-stocktake').addEventListener('submit', 
   clearStocktakeLine();
   await updatePublisherSuggestions();
   await updateStationerySupplierSummary();
+  await updateRecentStationeryList();
   document.getElementById('st-code').focus();
 });
 
