@@ -1,13 +1,13 @@
-const CACHE_NAME = 'sbc-inventory-v5';
+const CACHE_NAME = 'sbc-inventory-v6';
 const APP_ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest',
-  './css/styles.css',
-  './js/storage.js',
-  './js/metadata.js',
-  './js/scanner.js',
-  './js/app.js',
+  './manifest.webmanifest?v=6',
+  './css/styles.css?v=6',
+  './js/storage.js?v=6',
+  './js/metadata.js?v=6',
+  './js/scanner.js?v=6',
+  './js/app.js?v=6',
   './icons/icon.svg'
 ];
 
