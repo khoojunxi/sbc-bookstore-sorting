@@ -651,23 +651,30 @@ document.getElementById('btn-export-filtered').addEventListener('click', () => {
 
 document.getElementById('btn-export-stationery-suppliers').addEventListener('click', async () => {
   const allBooks = await StorageManager.getAllBooks();
-  const groups = groupStationeryBySupplier(allBooks);
+  const selectedSupplier = document.getElementById('filter-publisher').value;
 
-  if (!groups.length) {
-    alert('No stationery items to export.');
+  if (!selectedSupplier) {
+    alert('Please select one supplier first, then export.');
     return;
   }
 
-  groups.forEach(([supplier, items], index) => {
-    setTimeout(() => {
-      exportCSV(items, `stationery_${safeFilename(supplier)}.csv`);
-    }, index * 250);
-  });
+  const supplierItems = getStationeryItemsForSupplier(allBooks, selectedSupplier);
+
+  if (!supplierItems.length) {
+    alert(`No stationery items found for ${selectedSupplier}.`);
+    return;
+  }
+
+  exportCSV(supplierItems, `stationery_${safeFilename(selectedSupplier)}.csv`);
 });
 
 document.getElementById('btn-print-stationery-suppliers').addEventListener('click', async () => {
   const allBooks = await StorageManager.getAllBooks();
-  const groups = groupStationeryBySupplier(allBooks);
+  const selectedSupplier = document.getElementById('filter-publisher').value;
+  const sourceItems = selectedSupplier
+    ? getStationeryItemsForSupplier(allBooks, selectedSupplier)
+    : allBooks;
+  const groups = groupStationeryBySupplier(sourceItems);
 
   if (!groups.length) {
     alert('No stationery items to print.');
@@ -715,6 +722,21 @@ function groupStationeryBySupplier(books) {
       items.sort((a, b) => asText(a.isbn).localeCompare(asText(b.isbn), undefined, { numeric: true }))
     ])
     .sort(([a], [b]) => a.localeCompare(b));
+}
+
+function normalizeSupplierName(value) {
+  return asText(value).trim().toLowerCase();
+}
+
+function getStationeryItemsForSupplier(books, supplier) {
+  const normalizedSupplier = normalizeSupplierName(supplier);
+
+  return books
+    .filter(item =>
+      isStationeryItem(item) &&
+      normalizeSupplierName(item.publisher) === normalizedSupplier
+    )
+    .sort((a, b) => asText(a.isbn).localeCompare(asText(b.isbn), undefined, { numeric: true }));
 }
 
 function safeFilename(value) {
