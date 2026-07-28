@@ -153,8 +153,6 @@ document.getElementById('btn-type-stationery').addEventListener('click', async (
   document.getElementById('ns-supplier').value = '';
   document.getElementById('ns-rack').value = StorageManager.getLastRack();
   document.getElementById('ns-price').value = '';
-  document.getElementById('ns-discount').value = '';
-  document.getElementById('ns-cost').value = '';
   document.getElementById('ns-qty').value = 1;
 
   showSection('new-stationery');
@@ -185,43 +183,6 @@ function escapeHTML(value) {
 function formatPrice(value) {
   const price = Number(value);
   return Number.isFinite(price) ? price.toFixed(2) : '0.00';
-}
-
-function parseOptionalMoney(value) {
-  if (asText(value).trim() === '') return '';
-  const parsed = parseFloat(value);
-  return Number.isFinite(parsed) ? parsed : '';
-}
-
-function parseOptionalPercent(value) {
-  if (asText(value).trim() === '') return '';
-  const parsed = parseFloat(value);
-  return Number.isFinite(parsed) ? Math.min(Math.max(parsed, 0), 100) : '';
-}
-
-function invalidOptionalNumber(rawValue, parsedValue) {
-  return asText(rawValue).trim() !== '' && parsedValue === '';
-}
-
-function formatOptionalNumber(value) {
-  return value === '' || value === null || value === undefined ? '' : formatPrice(value);
-}
-
-function formatOptionalText(value) {
-  return value === '' || value === null || value === undefined ? '' : asText(value);
-}
-
-function calculateLineTotal(quantity, sellingPrice, discountPercent = 0) {
-  const qty = Number(quantity);
-  const price = Number(sellingPrice);
-  const discount = Number(discountPercent) || 0;
-
-  if (!Number.isFinite(qty) || !Number.isFinite(price)) return 0;
-  return qty * price * (1 - Math.min(Math.max(discount, 0), 100) / 100);
-}
-
-function itemTotal(item) {
-  return calculateLineTotal(item.quantity, item.sellingPrice, item.discountPercent);
 }
 
 function isStationeryItem(item) {
@@ -302,8 +263,6 @@ document.getElementById('form-new-stationery').addEventListener('submit', async 
     rackLocation: rack,
     bookCategory: 'Stationery',
     sellingPrice: parseFloat(document.getElementById('ns-price').value),
-    discountPercent: parseOptionalPercent(document.getElementById('ns-discount').value),
-    costPrice: parseOptionalMoney(document.getElementById('ns-cost').value),
     quantity: parseInt(document.getElementById('ns-qty').value, 10)
   };
 
@@ -331,15 +290,7 @@ async function prepareStationeryStocktake() {
   }
 
   await updateStationerySupplierSummary();
-  updateStocktakeTotal();
   document.getElementById('st-code').focus();
-}
-
-function updateStocktakeTotal() {
-  const qty = parseInt(document.getElementById('st-qty').value, 10);
-  const price = parseFloat(document.getElementById('st-price').value);
-  const discount = parseFloat(document.getElementById('st-discount').value) || 0;
-  document.getElementById('st-line-total').textContent = `RM ${formatPrice(calculateLineTotal(qty, price, discount))}`;
 }
 
 async function findStationeryStocktakeMatch(code, supplier) {
@@ -381,10 +332,7 @@ async function prefillStocktakeFromExisting() {
   document.getElementById('st-rack').value = item.rackLocation || StorageManager.getLastRack();
   document.getElementById('st-qty').value = item.quantity || 0;
   document.getElementById('st-price').value = item.sellingPrice || '';
-  document.getElementById('st-discount').value = item.discountPercent || '';
-  document.getElementById('st-cost').value = item.costPrice || '';
   document.getElementById('st-status').textContent = `Loaded existing stationery item ${code}. Update the counted quantity and save.`;
-  updateStocktakeTotal();
 }
 
 function clearStocktakeLine() {
@@ -392,9 +340,6 @@ function clearStocktakeLine() {
   document.getElementById('st-name').value = '';
   document.getElementById('st-qty').value = 1;
   document.getElementById('st-price').value = '';
-  document.getElementById('st-discount').value = '';
-  document.getElementById('st-cost').value = '';
-  updateStocktakeTotal();
 }
 
 async function updateStationerySupplierSummary() {
@@ -408,7 +353,6 @@ async function updateStationerySupplierSummary() {
       }
       acc[supplier].items += 1;
       acc[supplier].qty += Number(item.quantity) || 0;
-      acc[supplier].total += itemTotal(item);
       return acc;
     }, {});
 
@@ -425,14 +369,9 @@ async function updateStationerySupplierSummary() {
       <strong>${escapeHTML(supplier)}</strong>
       <span>${summary.items} items</span>
       <span>${summary.qty} qty</span>
-      <span>RM ${formatPrice(summary.total)}</span>
     </div>
   `).join('');
 }
-
-['st-qty', 'st-price', 'st-discount'].forEach(id => {
-  document.getElementById(id).addEventListener('input', updateStocktakeTotal);
-});
 
 ['st-code', 'st-supplier'].forEach(id => {
   document.getElementById(id).addEventListener('change', prefillStocktakeFromExisting);
@@ -453,10 +392,6 @@ document.getElementById('form-stationery-stocktake').addEventListener('submit', 
   const rack = document.getElementById('st-rack').value.trim();
   const qty = parseInt(document.getElementById('st-qty').value, 10);
   const price = parseFloat(document.getElementById('st-price').value);
-  const discountRaw = document.getElementById('st-discount').value;
-  const costRaw = document.getElementById('st-cost').value;
-  const discount = parseOptionalPercent(discountRaw);
-  const costPrice = parseOptionalMoney(costRaw);
 
   if (!code || !supplier || !name || !rack) {
     alert('SBC code, supplier, item name, and location are required.');
@@ -473,11 +408,6 @@ document.getElementById('form-stationery-stocktake').addEventListener('submit', 
     return;
   }
 
-  if (invalidOptionalNumber(discountRaw, discount) || invalidOptionalNumber(costRaw, costPrice)) {
-    alert('Please enter valid numbers for discount and cost price.');
-    return;
-  }
-
   const existing = await findStationeryStocktakeMatch(code, supplier);
   const stationery = existing || {
     itemType: 'Stationery',
@@ -491,8 +421,6 @@ document.getElementById('form-stationery-stocktake').addEventListener('submit', 
   stationery.rackLocation = rack;
   stationery.sellingPrice = price;
   stationery.quantity = qty;
-  stationery.discountPercent = discount;
-  stationery.costPrice = costPrice;
 
   await StorageManager.saveBook(stationery);
   StorageManager.setLastRack(rack);
@@ -575,9 +503,6 @@ function renderTable(books) {
       <td>${escapeHTML(b.title)}</td>
       <td>${escapeHTML(b.quantity)}</td>
       <td>${formatPrice(b.sellingPrice)}</td>
-      <td>${escapeHTML(formatOptionalText(b.discountPercent) || '-')}</td>
-      <td>${escapeHTML(formatOptionalNumber(b.costPrice) || '-')}</td>
-      <td>${formatPrice(itemTotal(b))}</td>
       <td>
         <div class="action-btns">
           <button class="btn btn-tertiary" data-action="edit" data-id="${escapeHTML(b.id)}">Edit</button>
@@ -628,23 +553,11 @@ window.editBook = async (id) => {
   const newPrice = prompt('Edit Selling Price (RM):', book.sellingPrice);
   if (newPrice === null) return;
 
-  let newDiscount = book.discountPercent || '';
-  let newCost = book.costPrice || '';
-  if (isStat) {
-    newDiscount = prompt('Edit Discount %:', book.discountPercent || '');
-    if (newDiscount === null) return;
-
-    newCost = prompt('Edit Cost Price (RM):', book.costPrice || '');
-    if (newCost === null) return;
-  }
-
   const newQty = prompt('Edit Quantity:', book.quantity);
   if (newQty === null) return;
 
   const parsedPrice = parseFloat(newPrice);
   const parsedQty = parseInt(newQty, 10);
-  const parsedDiscount = parseOptionalPercent(newDiscount);
-  const parsedCost = parseOptionalMoney(newCost);
   const trimmedTitle = newTitle.trim();
   const trimmedRack = newRack.trim();
 
@@ -663,18 +576,11 @@ window.editBook = async (id) => {
     return;
   }
 
-  if (invalidOptionalNumber(newDiscount, parsedDiscount) || invalidOptionalNumber(newCost, parsedCost)) {
-    alert('Please enter valid numbers for discount and cost price.');
-    return;
-  }
-
   book.title = trimmedTitle;
   book.publisher = newPublisher.trim();
   book.rackLocation = trimmedRack;
   book.sellingPrice = parsedPrice;
   book.quantity = parsedQty;
-  book.discountPercent = parsedDiscount;
-  book.costPrice = parsedCost;
 
   await StorageManager.saveBook(book);
   StorageManager.setLastRack(trimmedRack);
@@ -736,7 +642,7 @@ document.getElementById('btn-print-stationery-suppliers').addEventListener('clic
 });
 
 function exportCSV(books, filename) {
-  const headers = ['Rack Location', 'Category', 'Publisher / Supplier', 'SBC Code / ISBN', 'Title / Item Name', 'Qty Available', 'Selling Price (RM)', 'Disc %', 'Cost Price (RM)', 'Total (RM)'];
+  const headers = ['Rack Location', 'Category', 'Publisher / Supplier', 'SBC Code / ISBN', 'Title / Item Name', 'Qty Available', 'Selling Price (RM)'];
   const rows = books.map(b => [
     csvCell(b.rackLocation),
     csvCell(b.bookCategory),
@@ -744,10 +650,7 @@ function exportCSV(books, filename) {
     csvCell(b.isbn),
     csvCell(b.title),
     csvCell(b.quantity),
-    csvCell(formatPrice(b.sellingPrice)),
-    csvCell(formatOptionalText(b.discountPercent)),
-    csvCell(formatOptionalNumber(b.costPrice)),
-    csvCell(formatPrice(itemTotal(b)))
+    csvCell(formatPrice(b.sellingPrice))
   ]);
 
   const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
@@ -785,7 +688,6 @@ function safeFilename(value) {
 function openSupplierPrintSheets(groups) {
   const generatedDate = new Date().toLocaleDateString();
   const sheets = groups.map(([supplier, items]) => {
-    const total = items.reduce((acc, item) => acc + itemTotal(item), 0);
     const rows = items.map(item => `
       <tr>
         <td>${escapeHTML(item.rackLocation)}</td>
@@ -794,9 +696,6 @@ function openSupplierPrintSheets(groups) {
         <td>${escapeHTML(item.isbn)}</td>
         <td>${escapeHTML(item.quantity)}</td>
         <td>${formatPrice(item.sellingPrice)}</td>
-        <td>${escapeHTML(formatOptionalText(item.discountPercent))}</td>
-        <td>${escapeHTML(formatOptionalNumber(item.costPrice))}</td>
-        <td>${formatPrice(itemTotal(item))}</td>
       </tr>
     `).join('');
 
@@ -821,18 +720,9 @@ function openSupplierPrintSheets(groups) {
               <th>Stationery Code</th>
               <th>Qty</th>
               <th>Selling Price</th>
-              <th>Disc %</th>
-              <th>Cost Price</th>
-              <th>Total (RM)</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
-          <tfoot>
-            <tr>
-              <td colspan="8">Total (RM)</td>
-              <td>${formatPrice(total)}</td>
-            </tr>
-          </tfoot>
         </table>
       </section>
     `;

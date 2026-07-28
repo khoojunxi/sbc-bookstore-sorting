@@ -326,27 +326,6 @@ form select:focus {
   flex: 1;
 }
 
-.stocktake-total {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px;
-  margin-top: 6px;
-}
-
-.stocktake-total span {
-  color: #4b5563;
-  font-weight: 600;
-}
-
-.stocktake-total strong {
-  font-size: 1.2rem;
-  color: #111827;
-}
-
 .stocktake-status {
   min-height: 22px;
   color: #047857;
