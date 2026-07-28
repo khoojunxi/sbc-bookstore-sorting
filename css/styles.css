@@ -311,14 +311,79 @@ form select:focus {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  column-gap: 12px;
+}
+
 .form-actions {
   display: flex;
   gap: 12px;
   margin-top: 20px;
 }
-
 .form-actions .btn {
   flex: 1;
+}
+
+.stocktake-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 6px;
+}
+
+.stocktake-total span {
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.stocktake-total strong {
+  font-size: 1.2rem;
+  color: #111827;
+}
+
+.stocktake-status {
+  min-height: 22px;
+  color: #047857;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+.supplier-summary {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 22px;
+  padding-top: 16px;
+}
+
+.supplier-summary h3 {
+  font-size: 1rem;
+  color: #374151;
+  margin-bottom: 10px;
+}
+
+.supplier-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) repeat(3, auto);
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 9px 0;
+  font-size: 0.9rem;
+}
+
+.supplier-row span {
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.empty-state {
+  color: #6b7280;
+  font-size: 0.9rem;
 }
 
 /* ==========================================================================
@@ -391,10 +456,12 @@ form select:focus {
 .export-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .export-actions .btn {
   flex: 1;
+  min-width: 190px;
   font-size: 0.85rem;
 }
 
@@ -429,4 +496,17 @@ th {
 .action-btns .btn {
   padding: 4px 8px;
   font-size: 0.75rem;
+}
+
+@media (max-width: 560px) {
+  nav,
+  .form-actions,
+  .modal-actions,
+  .export-actions {
+    flex-direction: column;
+  }
+
+  .supplier-row {
+    grid-template-columns: 1fr 1fr;
+  }
 }

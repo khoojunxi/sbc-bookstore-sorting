@@ -2,7 +2,14 @@ class BarcodeScanner {
   constructor(videoElementId, onScanSuccess) {
     this.videoElement = document.getElementById(videoElementId);
     this.onScanSuccess = onScanSuccess;
-    
+    this.isScanning = false;
+
+    if (!window.ZXing) {
+      console.warn('ZXing barcode scanner library is not available. Manual entry still works.');
+      this.codeReader = null;
+      return;
+    }
+
     // Target retail formats for maximum scanning speed
     const hints = new Map();
     const formats = [
@@ -16,10 +23,14 @@ class BarcodeScanner {
     hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
 
     this.codeReader = new ZXing.BrowserMultiFormatReader(hints);
-    this.isScanning = false;
   }
 
   async start() {
+    if (!this.codeReader) {
+      alert('Camera scanner is unavailable. Please use manual entry or Stationery Count.');
+      return;
+    }
+
     if (this.isScanning) return;
 
     this.stop();
