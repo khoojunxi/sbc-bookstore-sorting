@@ -470,8 +470,19 @@ th {
     max-width: 100% !important;
   }
 
+  body {
+    display: block !important;
+    min-height: 0 !important;
+  }
+
+  main {
+    display: none !important;
+  }
+
   .print-only {
     display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .supplier-sheet-page {

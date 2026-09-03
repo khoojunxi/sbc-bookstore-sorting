@@ -435,6 +435,21 @@ window.deleteBook = async (id, title) => {
   }
 };
 
+document.getElementById('btn-delete-all').addEventListener('click', async () => {
+  const allBooks = await StorageManager.getAllBooks();
+  if (!allBooks.length) {
+    alert('Inventory is already empty.');
+    return;
+  }
+
+  const confirmed = confirm(`Are you sure you want to delete all ${allBooks.length} items from inventory?`);
+  if (!confirmed) return;
+
+  await StorageManager.clearAllBooks();
+  alert('All inventory items deleted successfully.');
+  loadInventory();
+});
+
 // Supplier Sheet Print Handler (Grouped by Supplier according to filtered rack)
 document.getElementById('btn-print-supplier-sheets').addEventListener('click', () => {
   const rackFilter = document.getElementById('filter-rack').value;
