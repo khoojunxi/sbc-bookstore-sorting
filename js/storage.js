@@ -2,6 +2,7 @@ const DB_NAME = 'BookstoreInventoryDB';
 const DB_VERSION = 2;
 const STORE_NAME = 'books';
 const LAST_RACK_KEY = 'last_used_rack';
+const LAST_SUPPLIER_KEY = 'last_used_supplier';
 
 class StorageManager {
   static openDB() {
@@ -130,6 +131,16 @@ class StorageManager {
   static setLastRack(rack) {
     if (rack) {
       localStorage.setItem(LAST_RACK_KEY, rack);
+    }
+  }
+
+  static getLastSupplier() {
+    return localStorage.getItem(LAST_SUPPLIER_KEY) || '';
+  }
+
+  static setLastSupplier(supplier) {
+    if (supplier) {
+      localStorage.setItem(LAST_SUPPLIER_KEY, supplier);
     }
   }
 }

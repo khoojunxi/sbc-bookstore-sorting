@@ -292,9 +292,15 @@ document.getElementById('form-stationery-direct').addEventListener('submit', asy
 
   await StorageManager.saveBook(stationery);
   StorageManager.setLastRack(rack);
+  StorageManager.setLastSupplier(supplier);
 
   document.getElementById('form-stationery-direct').reset();
-  document.getElementById('sd-qty').value = 1;
+  document.getElementById('sd-barcode').value = '';
+  document.getElementById('sd-supplier').value = supplier;
+  document.getElementById('sd-name').value = '';
+  document.getElementById('sd-rack').value = rack;
+  document.getElementById('sd-qty').value = '';
+  document.getElementById('sd-price').value = '';
   alert('Stationery stock count saved successfully!');
   document.getElementById('sd-barcode').focus();
 });
