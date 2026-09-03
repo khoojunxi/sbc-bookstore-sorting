@@ -2,15 +2,7 @@ class BarcodeScanner {
   constructor(videoElementId, onScanSuccess) {
     this.videoElement = document.getElementById(videoElementId);
     this.onScanSuccess = onScanSuccess;
-    this.isScanning = false;
-
-    if (!window.ZXing) {
-      console.warn('ZXing barcode scanner library is not available. Manual entry still works.');
-      this.codeReader = null;
-      return;
-    }
-
-    // Target retail formats for maximum scanning speed
+    
     const hints = new Map();
     const formats = [
       ZXing.BarcodeFormat.EAN_13,
@@ -23,14 +15,10 @@ class BarcodeScanner {
     hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
 
     this.codeReader = new ZXing.BrowserMultiFormatReader(hints);
+    this.isScanning = false;
   }
 
   async start() {
-    if (!this.codeReader) {
-      alert('Camera scanner is unavailable. Please use manual entry or Stationery Count.');
-      return;
-    }
-
     if (this.isScanning) return;
 
     this.stop();
@@ -41,14 +29,12 @@ class BarcodeScanner {
     try {
       this.isScanning = true;
 
-      // Ensure iOS WebKit playback compatibility
       if (this.videoElement) {
         this.videoElement.setAttribute('playsinline', 'true');
         this.videoElement.setAttribute('webkit-playsinline', 'true');
         this.videoElement.muted = true;
       }
 
-      // Hardware video constraints tuned for Android Chrome & iOS
       const constraints = {
         video: {
           facingMode: { ideal: 'environment' },
@@ -103,7 +89,6 @@ class BarcodeScanner {
   stop() {
     this.isScanning = false;
 
-    // Fully release media tracks to unlock camera hardware
     if (this.videoElement && this.videoElement.srcObject) {
       const stream = this.videoElement.srcObject;
       if (stream.getTracks) {
