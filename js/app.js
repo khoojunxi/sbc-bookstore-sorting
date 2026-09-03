@@ -538,3 +538,7 @@ document.getElementById('btn-print-supplier-sheets').addEventListener('click', (
 
   window.print();
 });
+
+document.getElementById('btn-save-pdf').addEventListener('click', () => {
+  document.getElementById('btn-print-supplier-sheets').click();
+});
