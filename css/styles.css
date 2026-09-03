@@ -311,73 +311,14 @@ form select:focus {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  column-gap: 12px;
-}
-
 .form-actions {
   display: flex;
   gap: 12px;
   margin-top: 20px;
 }
+
 .form-actions .btn {
   flex: 1;
-}
-
-.stocktake-status {
-  min-height: 22px;
-  color: #047857;
-  font-size: 0.9rem;
-  margin-top: 10px;
-}
-
-.supplier-summary {
-  border-top: 1px solid #e5e7eb;
-  margin-top: 22px;
-  padding-top: 16px;
-}
-
-.supplier-summary h3 {
-  font-size: 1rem;
-  color: #374151;
-  margin-bottom: 10px;
-}
-
-.supplier-row {
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) repeat(3, auto);
-  gap: 12px;
-  align-items: center;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 9px 0;
-  font-size: 0.9rem;
-}
-
-.supplier-row span {
-  color: #4b5563;
-  white-space: nowrap;
-}
-
-.recent-row {
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) auto auto auto;
-  gap: 12px;
-  align-items: center;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 9px 0;
-  font-size: 0.9rem;
-}
-
-.recent-row span {
-  color: #4b5563;
-  white-space: nowrap;
-}
-
-.empty-state {
-  color: #6b7280;
-  font-size: 0.9rem;
 }
 
 /* ==========================================================================
@@ -455,7 +396,7 @@ form select:focus {
 
 .export-actions .btn {
   flex: 1;
-  min-width: 190px;
+  min-width: 180px;
   font-size: 0.85rem;
 }
 
@@ -492,19 +433,82 @@ th {
   font-size: 0.75rem;
 }
 
-@media (max-width: 560px) {
+/* ==========================================================================
+   PRINT STYLES FOR SUPPLIER SHEETS BY RACK
+   ========================================================================== */
+.print-only {
+  display: none;
+}
+
+@media print {
+  .app-header,
   nav,
-  .form-actions,
-  .modal-actions,
-  .export-actions {
-    flex-direction: column;
+  .summary-cards,
+  .inventory-controls,
+  .table-wrapper,
+  .modal,
+  #section-scan,
+  #section-new-book,
+  #section-new-stationery,
+  h2,
+  button {
+    display: none !important;
   }
 
-  .supplier-row {
-    grid-template-columns: 1fr 1fr;
+  body, main, .view-section {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
-  .recent-row {
-    grid-template-columns: 1fr 1fr;
+  .print-only {
+    display: block !important;
+  }
+
+  .supplier-sheet-page {
+    page-break-after: always;
+    break-after: page;
+    margin-bottom: 2rem;
+    padding: 20px;
+  }
+
+  .supplier-sheet-header {
+    border-bottom: 2px solid #000000;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+
+  .supplier-sheet-header h2 {
+    display: block !important;
+    font-size: 1.4rem;
+    margin: 0 0 4px 0;
+  }
+
+  .supplier-sheet-header p {
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .supplier-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  .supplier-table th, 
+  .supplier-table td {
+    border: 1px solid #333333;
+    padding: 8px;
+    font-size: 0.85rem;
+    color: #000000;
+  }
+
+  .supplier-table th {
+    background-color: #f2f2f2 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
