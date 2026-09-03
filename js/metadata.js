@@ -3,7 +3,6 @@ class MetadataFetcher {
     let title = '';
     let publisher = '';
 
-    // Aggressive timeout helper (2.0 seconds max wait)
     const fetchWithTimeout = (url, timeoutMs = 2000) => {
       return Promise.race([
         fetch(url),
@@ -13,7 +12,6 @@ class MetadataFetcher {
       ]);
     };
 
-    // Parallel promise promises
     const googlePromise = fetchWithTimeout(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`)
       .then(res => res.json())
       .then(data => {
