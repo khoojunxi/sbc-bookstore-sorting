@@ -8,6 +8,7 @@ const scanner = new BarcodeScanner('video-preview', handleScannedISBN);
 const sectionScan = document.getElementById('section-scan');
 const sectionNewBook = document.getElementById('section-new-book');
 const sectionNewStationery = document.getElementById('section-new-stationery');
+const sectionStationeryDirect = document.getElementById('section-stationery-direct');
 const sectionInventory = document.getElementById('section-inventory');
 const modalItemType = document.getElementById('modal-item-type');
 const modalExisting = document.getElementById('modal-existing-book');
@@ -15,6 +16,7 @@ const manualIsbnInput = document.getElementById('manual-isbn');
 
 // Navigation Switches
 document.getElementById('nav-scan').addEventListener('click', () => showSection('scan'));
+document.getElementById('nav-stationery-direct').addEventListener('click', () => showSection('stationery-direct'));
 document.getElementById('nav-inventory').addEventListener('click', () => {
   showSection('inventory');
   loadInventory();
@@ -24,11 +26,13 @@ function showSection(name) {
   sectionScan.classList.add('hidden');
   sectionNewBook.classList.add('hidden');
   sectionNewStationery.classList.add('hidden');
+  sectionStationeryDirect.classList.add('hidden');
   sectionInventory.classList.add('hidden');
   modalExisting.classList.add('hidden');
   modalItemType.classList.add('hidden');
 
   document.getElementById('nav-scan').classList.remove('active');
+  document.getElementById('nav-stationery-direct').classList.remove('active');
   document.getElementById('nav-inventory').classList.remove('active');
 
   if (name === 'scan') {
@@ -43,6 +47,10 @@ function showSection(name) {
     scanner.stop();
   } else if (name === 'new-stationery') {
     sectionNewStationery.classList.remove('hidden');
+    scanner.stop();
+  } else if (name === 'stationery-direct') {
+    sectionStationeryDirect.classList.remove('hidden');
+    document.getElementById('nav-stationery-direct').classList.add('active');
     scanner.stop();
   }
 }
@@ -253,6 +261,42 @@ document.getElementById('form-new-stationery').addEventListener('submit', async 
 
 document.getElementById('btn-cancel-new-stat').addEventListener('click', () => {
   showSection('scan');
+});
+
+// Save Direct Stationery Stocktake
+document.getElementById('form-stationery-direct').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const rack = document.getElementById('sd-rack').value.trim();
+  const supplier = document.getElementById('sd-supplier').value.trim();
+  const name = document.getElementById('sd-name').value.trim();
+  const barcode = document.getElementById('sd-barcode').value.trim();
+  const qty = parseInt(document.getElementById('sd-qty').value, 10);
+  const price = parseFloat(document.getElementById('sd-price').value);
+
+  if (!supplier || !name || !rack || Number.isNaN(qty) || qty < 1 || Number.isNaN(price)) {
+    alert('Please complete all required stationery stocktake fields with valid values.');
+    return;
+  }
+
+  const stationery = {
+    itemType: 'Stationery',
+    isbn: barcode,
+    title: name,
+    publisher: supplier,
+    rackLocation: rack,
+    bookCategory: 'Stationery',
+    sellingPrice: price,
+    quantity: qty
+  };
+
+  await StorageManager.saveBook(stationery);
+  StorageManager.setLastRack(rack);
+
+  document.getElementById('form-stationery-direct').reset();
+  document.getElementById('sd-qty').value = 1;
+  alert('Stationery stock count saved successfully!');
+  document.getElementById('sd-barcode').focus();
 });
 
 // Inventory Table and Filters
