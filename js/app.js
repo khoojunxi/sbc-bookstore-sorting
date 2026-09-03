@@ -435,39 +435,6 @@ window.deleteBook = async (id, title) => {
   }
 };
 
-// CSV Export
-document.getElementById('btn-export-all').addEventListener('click', async () => {
-  const allBooks = await StorageManager.getAllBooks();
-  allBooks.sort((a, b) => a.bookCategory.localeCompare(b.bookCategory));
-  exportCSV(allBooks, 'entire_inventory.csv');
-});
-
-document.getElementById('btn-export-filtered').addEventListener('click', () => {
-  exportCSV(filteredBooksList, 'filtered_inventory.csv');
-});
-
-function exportCSV(books, filename) {
-  const headers = ['Rack Location', 'Category', 'Publisher / Supplier', 'Barcode / ISBN', 'Title / Item Name', 'Qty Available', 'Selling Price (RM)'];
-  const rows = books.map(b => [
-    `"${b.rackLocation}"`,
-    `"${b.bookCategory}"`,
-    `"${b.publisher || ''}"`,
-    `"${b.isbn || ''}"`,
-    `"${b.title.replace(/"/g, '""')}"`,
-    b.quantity,
-    b.sellingPrice.toFixed(2)
-  ]);
-
-  const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement('a');
-  link.setAttribute('href', encodedUri);
-  link.setAttribute('download', filename);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
 // Supplier Sheet Print Handler (Grouped by Supplier according to filtered rack)
 document.getElementById('btn-print-supplier-sheets').addEventListener('click', () => {
   const rackFilter = document.getElementById('filter-rack').value;
